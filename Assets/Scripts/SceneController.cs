@@ -8,4 +8,8 @@ public class SceneController : MonoBehaviour
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneNum);
     }
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
 }
