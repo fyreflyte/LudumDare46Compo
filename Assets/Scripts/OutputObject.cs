@@ -9,7 +9,6 @@ using UnityEngine;
 public class OutputObject : InteractableObject
 {
     public string objGivenName;
-    public Sprite objGivenSprite;
     public float cooldownTime = 0;
     public float cooldownCounter = 0;
 
@@ -17,12 +16,15 @@ public class OutputObject : InteractableObject
     {
         // If player is holding an object, return
         if (interactZone.IsHoldingObject())
+        {
+            FloatingTextController.Instance.CreateFloatingPopupText("your hands are full", transform.position, default(Color), FloatingFadeMethod.Alpha);
             return;
+        }
         // If cooldown is not ready, return
         if (cooldownCounter - Time.time > cooldownTime)
             return;
 
-        interactZone.AttachCarryableObject(objGivenName, objGivenSprite);
+        interactZone.AttachCarryableObject(objGivenName);
         PlaySoundFX();
         // Set my cooldown counter
         cooldownCounter = Time.time + cooldownTime;

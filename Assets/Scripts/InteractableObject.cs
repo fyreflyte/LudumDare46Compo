@@ -6,8 +6,7 @@ public class InteractableObject : MonoBehaviour
 {
     public GameObject selectedGlowPulse;
     public bool isAnimating = false;
-    public AudioClip myClip;
-
+    public List<AudioClip> myClips = new List<AudioClip>();
     /// <summary>
     /// Starts/Stops an interactible object glowing when player can interact with it
     /// </summary>
@@ -36,12 +35,12 @@ public class InteractableObject : MonoBehaviour
 
     }
 
-    public void PlaySoundFX()
+    public void PlaySoundFX(int num = 0)
     {
         var myAS = GetComponent<AudioSource>();
-        if (myAS != null && myClip != null && !myAS.isPlaying)
+        if (myAS != null && myClips != null && myClips.Count > num && !myAS.isPlaying)
         {
-            myAS.clip = myClip;
+            myAS.clip = myClips[num];
             myAS.Play();
         }
     }

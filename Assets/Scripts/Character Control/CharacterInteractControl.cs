@@ -11,6 +11,7 @@ public class CharacterInteractControl : MonoBehaviour
     [SerializeField]
     private float positionScale;
     public GameObject heldObject;
+    public GameObject firePlateParticles;
     private string heldObjName;
     // Start is called before the first frame update
     void Start()
@@ -37,6 +38,17 @@ public class CharacterInteractControl : MonoBehaviour
             return;
         facing.Normalize();
         transform.localPosition = facing * positionScale;
+
+        if (facing.y > 0)
+        {
+            heldObject.GetComponent<SpriteRenderer>().sortingOrder = 4;
+            firePlateParticles.GetComponent<ParticleSystemRenderer>().sortingOrder = 4;
+        }
+        else
+        {
+            heldObject.GetComponent<SpriteRenderer>().sortingOrder = 6;
+            firePlateParticles.GetComponent<ParticleSystemRenderer>().sortingOrder = 6;
+        }
     }
 
     /// <summary>
@@ -73,15 +85,16 @@ public class CharacterInteractControl : MonoBehaviour
     /// Attach a newly-spawned CarryableObject to this script
     /// </summary>
     /// <param name="attachedObj">The obj in question</param>
-    public void AttachCarryableObject(string attachedName, Sprite attachedSprite)
+    public void AttachCarryableObject(string attachedName)
     {
         heldObjName = attachedName;
-        heldObject.GetComponent<SpriteRenderer>().sprite = attachedSprite;
+        heldObject.GetComponent<SpriteRenderer>().sprite = HealthBarAttributeController.Instance.GetResourceSprite(attachedName);
         heldObject.SetActive(true);
+        firePlateParticles.SetActive(heldObjName == "Fire");
     }
 
     /// <summary>
-    /// When the player interacts with an OutputObject and is carrying something,
+    /// When the player interacts with an input and is carrying something,
     /// the inputobject calls this method
     /// </summary>
     /// <param name="receivingObj">The object to transfer the carried obj to</param>

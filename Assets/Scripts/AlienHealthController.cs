@@ -1,15 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class AlienHealthController : MonoBehaviour
 {
     public static AlienHealthController Instance;
     public List<AlienType> alienLevels = new List<AlienType>();
     public List<HealthBar> healthBarUIs;
+    public List<GameObject> aliensInTankImages;
     private Dictionary<string, HealthBar> healthBarUIDict;
     public InputObject alienTankObject;
-
+   
     public Dictionary<string, float> currentAlienNeeds;
     public Dictionary<string, float> currentAlienHealth;
     [Range(0.1f, 2)]
@@ -18,6 +20,9 @@ public class AlienHealthController : MonoBehaviour
 
     public bool playerControlsLocked = true;
     public GameObject gameOverWindow;
+    public TextMeshProUGUI aliensSavedText;
+    public int countdownTimer;
+    public TextMeshProUGUI countdownText;
 
     // Start is called before the first frame update
     void Start()
@@ -29,30 +34,24 @@ public class AlienHealthController : MonoBehaviour
         Dictionary<string, float> rNeeds;
 
         rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1 }, { "Sodium", 1 }, { "Sulphur", 1 }, { "Iron", 1 } };
-        newAlien = new AlienType("level_01", rNeeds);
+        newAlien = new AlienType(0, rNeeds, 90);
         alienLevels.Add(newAlien);
 
         rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1 }, { "Sodium", 2 }, { "Chlorine", 0.5f }, { "Sulphur", 3 } };
-        newAlien = new AlienType("level_02", rNeeds);
+        newAlien = new AlienType(1, rNeeds, 90);
         alienLevels.Add(newAlien);
 
         rNeeds = new Dictionary<string, float>() { { "Cooked Meat", 0.75f }, { "Sodium", 1 }, { "Salt", 0.75f }, { "Chlorine", 1 } };
-        newAlien = new AlienType("level_03", rNeeds);
+        newAlien = new AlienType(2, rNeeds, 120);
         alienLevels.Add(newAlien);
 
         rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1 }, { "Cooked Meat", 1 }, { "Sodium", 3 }, { "Fire", 0.5f } };
-        newAlien = new AlienType("level_04", rNeeds);
+        newAlien = new AlienType(3, rNeeds, 120);
         alienLevels.Add(newAlien);
 
         rNeeds = new Dictionary<string, float>() { { "Salt", 1 }, { "Chlorine", 0.75f }, { "Sulphur", 0.75f }, { "Fire", 1.3f } };
-        newAlien = new AlienType("level_05", rNeeds);
+        newAlien = new AlienType(4, rNeeds, 180);
         alienLevels.Add(newAlien);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     /// <summary>
@@ -72,6 +71,7 @@ public class AlienHealthController : MonoBehaviour
             healthBarUIDict[resource] = healthBarUIs[i];
             i++;
         }
+        EnableAlienImage(alienLevels[levelNum - 1].aType);
 
         // Data setup
         currentAlienNeeds = resourceNeeds;
@@ -84,8 +84,20 @@ public class AlienHealthController : MonoBehaviour
         }
         CancelInvoke("UpdateAlienHealth");
         Invoke("UpdateAlienHealth", 3);
-
+        StartCountdown(alienLevels[levelNum - 1].saveTime);
         playerControlsLocked = false;
+    }
+
+    /// <summary>
+    /// Enables one alien image while disabling the rest
+    /// </summary>
+    /// <param name="num">The index of the enabled image</param>
+    public void EnableAlienImage(int num)
+    {
+        for (int i = 0; i < aliensInTankImages.Count; i++)
+        {
+            aliensInTankImages[i].SetActive(i == num);
+        }
     }
 
     public void UpdateAlienHealth()
@@ -118,6 +130,49 @@ public class AlienHealthController : MonoBehaviour
         UpdateAlienHealth();
     }
 
+    /// <summary>
+    /// This is not an efficient way to set up a timer - if you're reading this
+    /// you should simply store the current time and then check against that
+    /// as needed. However, in the interest of my sanity, I'm taking the easy
+    /// way for this one.
+    /// </summary>
+    /// <param name="timeInSeconds">Time in seconds... duh</param>
+    public void StartCountdown(int timeInSeconds)
+    {
+        countdownText.text = FormatCountdownTimer(timeInSeconds);
+        countdownTimer = timeInSeconds;
+        CancelInvoke("CountTimeDown");
+        Invoke("CountTimeDown", 1);
+    }
+
+    public void CountTimeDown()
+    {
+        countdownTimer--;
+        countdownText.text = FormatCountdownTimer(countdownTimer);
+        if (countdownTimer < 1)
+        {
+            // Go next level
+            return;
+        }
+        else
+            Invoke("CountTimeDown", 1);
+    }
+
+    private string FormatCountdownTimer(int time)
+    {
+        int minutes = time / 60;
+        int seconds = time % 60;
+
+        return "0" + minutes + ":" + (seconds > 9 ? seconds.ToString() : "0" + seconds);
+    }
+
+
+    public void CompleteLevel()
+    {
+        // TODO: Bring up a Level Complete window, and animation?
+
+    }
+
     public void GameOver()
     {
         playerControlsLocked = true;
@@ -128,13 +183,16 @@ public class AlienHealthController : MonoBehaviour
 
 public class AlienType
 {
-    // Monster type - not displayed
-    string aType;
+    // Monster type
+    public int aType;
     // Dict of resources needed and how fast they decay
     public Dictionary<string, float> resourceNeeds;
-    public AlienType(string typeName, Dictionary<string, float> resources)
+    public int saveTime;
+
+    public AlienType(int typeNum, Dictionary<string, float> resources, int timeInSeconds)
     {
-        aType = typeName;
+        aType = typeNum;
         resourceNeeds = resources;
+        saveTime = timeInSeconds;
     }
 }

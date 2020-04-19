@@ -11,6 +11,8 @@ public class InputObject : InteractableObject
     private float cooldownTime = 0;
     private float cooldownCounter = 0;
     public List<string> validReceivableObjects = new List<string>();
+
+    public string customObjectRejectText = "this object doesn't go here";
     public override void InteractWithObject(CharacterInteractControl obj)
     {
         if (cooldownCounter - Time.time > cooldownTime)
@@ -29,13 +31,26 @@ public class InputObject : InteractableObject
     public bool ReceiveHeldObject(string objName)
     {
         if (!validReceivableObjects.Contains(objName) && !validReceivableObjects.Contains("All"))
+        {
+            FloatingTextController.Instance.CreateFloatingPopupText(customObjectRejectText, transform.position, default(Color), FloatingFadeMethod.Alpha);
             return false;
+        }
 
         if (isHealthIncrement)
             AlienHealthController.Instance.AddHealthObject(objName);
+        ExtraReceive(objName);
         // Set my cooldown counter
         cooldownCounter = Time.time + cooldownTime;
         PlaySoundFX();
         return true;
+    }
+
+    /// <summary>
+    /// Does extra stuff for mixers and burners
+    /// </summary>
+    /// <param name="objName"></param>
+    public virtual void ExtraReceive(string objName)
+    {
+
     }
 }

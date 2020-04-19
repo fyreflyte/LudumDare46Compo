@@ -229,8 +229,7 @@ MonoBehaviour:
   m_text: sodium
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a2896eae861798348b615ee23f7cd5d8, type: 2}
-  m_sharedMaterial: {fileID: 5511875907415388721, guid: a2896eae861798348b615ee23f7cd5d8,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: a980caa414b8f1a42b9cd0664639d8e0, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

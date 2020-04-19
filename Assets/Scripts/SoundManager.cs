@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 
 public class SoundManager : MonoBehaviour
 {
     AudioSource mySource;
     public AudioMixerGroup myMixer;
+    public Slider mainVolumeSlider;
     // Start is called before the first frame update
     void Start()
     {
         mySource = GetComponent<AudioSource>();
+        AdjustVolume();
     }
 
     // Update is called once per frame
@@ -27,5 +30,10 @@ public class SoundManager : MonoBehaviour
     {
         mySource.pitch = newTempo;
         myMixer.audioMixer.SetFloat("MyPitchShift", 1f / newTempo);
+    }
+
+    public void AdjustVolume()
+    {
+        AudioListener.volume = mainVolumeSlider.value;
     }
 }
