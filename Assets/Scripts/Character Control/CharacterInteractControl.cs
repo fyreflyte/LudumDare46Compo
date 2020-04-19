@@ -22,7 +22,7 @@ public class CharacterInteractControl : MonoBehaviour
     void Update()
     {
         UpdateInteractPosition();
-        if (Input.GetButtonDown("Fire1"))// && !GameManager.Instance.inputLocked)
+        if (Input.GetButtonDown("Fire1") && !AlienHealthController.Instance.playerControlsLocked)
             InteractWithZone();
     }
 

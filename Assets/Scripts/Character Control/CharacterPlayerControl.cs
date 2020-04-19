@@ -26,7 +26,7 @@ public class CharacterPlayerControl : CharacterBaseControl
         var vert = Input.GetAxisRaw("Vertical");
 
         Vector2 newDirection = new Vector2(horiz, vert);
-
-        SetDirection(newDirection);
+        if (!AlienHealthController.Instance.playerControlsLocked)
+            SetDirection(newDirection);
     }
 }

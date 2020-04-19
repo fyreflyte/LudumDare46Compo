@@ -23,7 +23,7 @@ public class CharacterMovementModel : MonoBehaviour
     public void UpdateMovement()
     {
         //Debug.Log("Update movement");
-        if (movementDirection == Vector2.zero)// || GameManager.Instance.inputLocked)
+        if (movementDirection == Vector2.zero || AlienHealthController.Instance.playerControlsLocked)
             return;
         movementDirection.Normalize();
 

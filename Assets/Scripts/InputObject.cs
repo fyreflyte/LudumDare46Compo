@@ -7,6 +7,7 @@ using UnityEngine;
 /// </summary>
 public class InputObject : InteractableObject
 {
+    public bool isHealthIncrement = false;
     private float cooldownTime = 0;
     private float cooldownCounter = 0;
     public List<string> validReceivableObjects = new List<string>();
@@ -30,6 +31,8 @@ public class InputObject : InteractableObject
         if (!validReceivableObjects.Contains(objName) && !validReceivableObjects.Contains("All"))
             return false;
 
+        if (isHealthIncrement)
+            AlienHealthController.Instance.AddHealthObject(objName);
         // Set my cooldown counter
         cooldownCounter = Time.time + cooldownTime;
         PlaySoundFX();
