@@ -124,7 +124,6 @@ public class AlienHealthController : MonoBehaviour
 
     public void UpdateAlienHealth()
     {
-        Debug.Log("Update " + Time.time);
         foreach (string resource in currentAlienNeeds.Keys)
         {
             currentAlienHealth[resource] -= currentAlienNeeds[resource] * healthLossRate;
@@ -193,6 +192,7 @@ public class AlienHealthController : MonoBehaviour
 
     public void CompleteLevel()
     {
+        CancelInvoke("CountTimeDown");
         CancelInvoke("UpdateAlienHealth");
         goodWorkText.SetActive(currentLevel != 0);
         aliensSavedText.text = currentLevel.ToString();
@@ -242,6 +242,7 @@ public class AlienHealthController : MonoBehaviour
 
     public void GameOver()
     {
+        CancelInvoke("CountTimeDown");
         CancelInvoke("UpdateAlienHealth");
         playerControlsLocked = true;
         // TODO: Alien dies animation, fade in window, change music
