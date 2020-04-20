@@ -41,13 +41,13 @@ public class CharacterInteractControl : MonoBehaviour
 
         if (facing.y > 0)
         {
-            heldObject.GetComponent<SpriteRenderer>().sortingOrder = 4;
+            heldObject.GetComponent<SpriteRenderer>().sortingOrder = 3;
             firePlateParticles.GetComponent<ParticleSystemRenderer>().sortingOrder = 4;
         }
         else
         {
             heldObject.GetComponent<SpriteRenderer>().sortingOrder = 6;
-            firePlateParticles.GetComponent<ParticleSystemRenderer>().sortingOrder = 6;
+            firePlateParticles.GetComponent<ParticleSystemRenderer>().sortingOrder = 7;
         }
     }
 

@@ -14,15 +14,20 @@ public class AlienHealthController : MonoBehaviour
    
     public Dictionary<string, float> currentAlienNeeds;
     public Dictionary<string, float> currentAlienHealth;
-    [Range(0.1f, 2)]
-    public float healthLossRate = 1;
-    public float healthAddIncrement = 10;
+    float healthLossRate = 1f;
+    float healthAddIncrement = 25;
 
     public bool playerControlsLocked = true;
     public GameObject gameOverWindow;
+    public GameObject winGameWindow;
     public TextMeshProUGUI aliensSavedText;
     public int countdownTimer;
     public TextMeshProUGUI countdownText;
+
+    public GameObject storyPanel;
+    public GameObject goodWorkText;
+    public TextMeshProUGUI storyDialogText;
+    public int currentLevel;
 
     // Start is called before the first frame update
     void Start()
@@ -33,25 +38,42 @@ public class AlienHealthController : MonoBehaviour
         AlienType newAlien;
         Dictionary<string, float> rNeeds;
 
-        rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1 }, { "Sodium", 1 }, { "Sulphur", 1 }, { "Iron", 1 } };
-        newAlien = new AlienType(0, rNeeds, 90);
+        // Need 1 of each
+        rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1.8f }, { "Sodium", 1.8f }, { "Sulphur", 1.8f }, { "Iron", 1.8f } };
+        newAlien = new AlienType(0, rNeeds, 60);
         alienLevels.Add(newAlien);
 
-        rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1 }, { "Sodium", 2 }, { "Chlorine", 0.5f }, { "Sulphur", 3 } };
+        // Need 2 meat, 3 Na, 1 Cl, 3 Su
+        rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1.2f }, { "Sodium", 1.3f }, { "Chlorine", 1f }, { "Sulphur", 1.3f } };
         newAlien = new AlienType(1, rNeeds, 90);
         alienLevels.Add(newAlien);
 
-        rNeeds = new Dictionary<string, float>() { { "Cooked Meat", 0.75f }, { "Sodium", 1 }, { "Salt", 0.75f }, { "Chlorine", 1 } };
+        // Need 2 meats, 3 Na, 2 NaCl, 3 Cl
+        rNeeds = new Dictionary<string, float>() { { "Cooked Meat", 0.9f }, { "Sodium", 1 }, { "Salt", 0.9f }, { "Chlorine", 1 } };
         newAlien = new AlienType(2, rNeeds, 120);
         alienLevels.Add(newAlien);
 
-        rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1 }, { "Cooked Meat", 1 }, { "Sodium", 3 }, { "Fire", 0.5f } };
+        // Need 3 raw meat, 3 cooked meat, 6 Na, 2 fire
+        rNeeds = new Dictionary<string, float>() { { "Raw Meat", 1 }, { "Cooked Meat", 1 }, { "Sodium", 1.5f }, { "Fire", 1.1f } };
         newAlien = new AlienType(3, rNeeds, 120);
         alienLevels.Add(newAlien);
 
-        rNeeds = new Dictionary<string, float>() { { "Salt", 1 }, { "Chlorine", 0.75f }, { "Sulphur", 0.75f }, { "Fire", 1.3f } };
+        // Need 6 NaCl, 4 Cl, 4 Su, 10 Fire
+        rNeeds = new Dictionary<string, float>() { { "Salt", 0.9f }, { "Chlorine", 0.75f }, { "Sulphur", 0.75f }, { "Fire", 1.3f } };
         newAlien = new AlienType(4, rNeeds, 180);
         alienLevels.Add(newAlien);
+
+        currentLevel = 0;
+        CompleteLevel();
+    }
+
+    public void DEBUG_SetShortLevelTimes()
+    {
+        foreach (AlienType alien in alienLevels)
+        {
+            alien.saveTime = 3;
+        }
+        BeginLevel(1);
     }
 
     /// <summary>
@@ -102,9 +124,10 @@ public class AlienHealthController : MonoBehaviour
 
     public void UpdateAlienHealth()
     {
+        Debug.Log("Update " + Time.time);
         foreach (string resource in currentAlienNeeds.Keys)
         {
-            currentAlienHealth[resource] -= currentAlienNeeds[resource];
+            currentAlienHealth[resource] -= currentAlienNeeds[resource] * healthLossRate;
             healthBarUIDict[resource].SetHealthBar(currentAlienHealth[resource]/100f);
 
             if (currentAlienHealth[resource] < 0)
@@ -152,6 +175,7 @@ public class AlienHealthController : MonoBehaviour
         if (countdownTimer < 1)
         {
             // Go next level
+            CompleteLevel();
             return;
         }
         else
@@ -169,15 +193,66 @@ public class AlienHealthController : MonoBehaviour
 
     public void CompleteLevel()
     {
-        // TODO: Bring up a Level Complete window, and animation?
+        CancelInvoke("UpdateAlienHealth");
+        goodWorkText.SetActive(currentLevel != 0);
+        aliensSavedText.text = currentLevel.ToString();
+        storyPanel.SetActive(true);
+        storyDialogText.text = QueryStoryDialog(currentLevel);
+        playerControlsLocked = true;
+        Invoke("BeginNextLevel", 5);
+    }
+
+    public void BeginNextLevel()
+    {
+        storyPanel.SetActive(false);
+        currentLevel++;
+        if (currentLevel > 5)
+        {
+            WinGame();
+            return;
+        }
+
+        BeginLevel(currentLevel);
+    }
+
+    public string QueryStoryDialog(int level)
+    {
+        string nl = System.Environment.NewLine;
+        // this alien will surely perish if its nourishment requirements are not met
+        switch (level)
+        {
+            case 0:
+                return "the human race is doomed..." + nl + "or is it..." + nl + "working quickly, you must keep your alien subjects alive long enough to manufacture antibodies";
+            case 1:
+                return "you kept the alien nourshed long enough to produce some useful antibodies" + nl + nl +"on to the next...";
+            case 2:
+                return "the alien survived, and you were able to use it to manufacture another set of antibodies" + nl + nl + "only three more to go";
+            case 3:
+                return "you are becoming more adept at your work, but the remaining aliens are fading fast" + nl + nl + "the pressure is mounting...";
+            case 4:
+                return "you're getting close. just one more set of antibodies and the human race is saved" + nl + nl + "but your next subject requires... fire";
+            case 5:
+                return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+            default:
+                return "";
+        }
 
     }
 
     public void GameOver()
     {
+        CancelInvoke("UpdateAlienHealth");
         playerControlsLocked = true;
         // TODO: Alien dies animation, fade in window, change music
         gameOverWindow.SetActive(true);
+    }
+
+    public void WinGame()
+    {
+        CancelInvoke("UpdateAlienHealth");
+        playerControlsLocked = true;
+        winGameWindow.SetActive(true);
     }
 }
 

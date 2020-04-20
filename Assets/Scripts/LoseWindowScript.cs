@@ -4,24 +4,48 @@ using UnityEngine;
 
 public class LoseWindowScript : MonoBehaviour
 {
-    public Animator gameOverAnimator;
+    public Animator mainTextAnimator;
+    public Animator additionalAnimator;
     public Animator tryAgainAnimator;
+    public Animator storyTextAnimator;
+    public float fadeTitleText = 1;
+    public float fadeButtonText = 1;
+    public float fadeStoryText = 1;
 
     void OnEnable()
     {
-        gameOverAnimator.SetBool("fadeInObject", true);
-        Invoke("FadeInButton", 1);
+        Invoke("FadeInMainText", fadeTitleText);
+        Invoke("FadeInButton", fadeButtonText);
+        Invoke("FadeInStory", fadeStoryText);
     }
 
     private void OnDisable()
     {
-        gameOverAnimator.SetBool("fadeInObject", false);
+        mainTextAnimator.SetBool("fadeInObject", false);
+        if (additionalAnimator != null)
+            additionalAnimator.SetBool("fadeInObject", false);
+
         tryAgainAnimator.SetBool("fadeInObject", false);
+        storyTextAnimator.SetBool("fadeInObject", false);
+    }
+
+
+    private void FadeInMainText()
+    {
+        mainTextAnimator.speed = 0.5f;
+        mainTextAnimator.SetBool("fadeInObject", true);
+        if (additionalAnimator != null)
+            additionalAnimator.SetBool("fadeInObject", true);
     }
 
     private void FadeInButton()
     {
-
         tryAgainAnimator.SetBool("fadeInObject", true);
+    }
+
+    private void FadeInStory()
+    {
+        storyTextAnimator.speed = 0.3f;
+        storyTextAnimator.SetBool("fadeInObject", true);
     }
 }
